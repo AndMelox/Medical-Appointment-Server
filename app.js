@@ -1,13 +1,11 @@
 const express = require('express');
-const app = express(); 
-const port = 3000; 
-
-app.use(express.json());
+const app = express();
+const port = 3000;
 
 app.get('/', (req, res) => {
-  res.send('¡Hola, mundo!');
+  res.send('Servidor Express funcionando detrás de Apache Lounge en Windows');
 });
 
 app.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
+  console.log(`Servidor Express escuchando en http://localhost:${port}`);
 });
