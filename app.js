@@ -10,9 +10,10 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Añade un timestamp al nombre del archivo para evitar colisiones
+    cb(null, Date.now() + path.extname(file.originalname)); 
   }
 });
+
 const upload = multer({ storage: storage });
 
 app.use(express.json());
