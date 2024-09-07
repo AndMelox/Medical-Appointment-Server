@@ -6,6 +6,9 @@ const app = express();
 const filePath = 'citas.json';
 const port = 3000;
 
+let appointmentCounter = 0; 
+
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
@@ -17,7 +20,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.use(express.json());
-let appointmentCounter = 0;
 
 function readDataFromFile() {
     if (fs.existsSync(filePath)) {
@@ -48,55 +50,52 @@ function readDataFromFile() {
   app.post('/save', (req, res) => {
     console.log('Solicitud POST recibida para guardar datos:', req.body);
     const dataArray = Array.isArray(req.body) ? req.body : [req.body];
-    for (const item of dataArray) {
-      if (typeof item.id === 'undefined' || typeof item.arrivalTime === 'undefined') {
-        console.warn('Solicitud incorrecta. Cada objeto debe tener un ID y una fecha programada.');
-        return res.status(400).send('Cada objeto debe tener un ID y una fecha programada.');
-      }
-    }
-  
-    let existingData = readDataFromFile();
     
-    for (const data of dataArray) {
-      const existingItem = existingData.find(item => item.id === data.id);
-      if (existingItem) {
-        console.warn(`El ID ${data.id} ya existe.`);
-        return res.status(400).send(`La CC ${data.id} ya existe. Intenta con otro ID.`);
-      }
-
-      const sameTimeItem = existingData.find(item => item.arrivalTime === data.arrivalTime);
-      if (sameTimeItem) {
-        console.warn(`Ya existe una cita a la misma hora y el mismo día: ${data.arrivalTime}.`);
-        return res.status(400).send(`Ya existe una cita a la misma hora y el mismo día: ${data.arrivalTime}.`);
-      }
+  for (const item of dataArray) {
+    if (typeof item.cc === 'undefined' || typeof item.arrivalTime === 'undefined') {
+      console.warn('Solicitud incorrecta. Cada objeto debe tener una cédula y una fecha programada.');
+      return res.status(400).send('Cada objeto debe tener una cédula y una fecha programada.');
     }
-  
-    for (const data of dataArray) {
-      const arrivalTime = new Date().toISOString();
-      const newData = { ...data, arrivalTime: arrivalTime, modificationCount: 0 }; 
-      existingData.push(newData);
+
+    if (!/^\d{10}$/.test(item.cc)) {
+      console.warn('La cédula debe tener 10 dígitos.');
+      return res.status(400).send('La cédula debe tener 10 dígitos.');
     }
-  
-    writeDataToFile(existingData);
-    console.log('Datos guardados correctamente.');
-    res.send('Datos guardados correctamente.');
-  });
-app.delete('/delete/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  console.log(`Solicitud DELETE recibida para eliminar cita con ID: ${id}`);
-
-  let existingData = readDataFromFile();
-  const index = existingData.findIndex(item => item.id === id);
-
-  if (index === -1) {
-    console.warn(`No se encontró una cita con el ID: ${id}`);
-    return res.status(404).send(`No se encontró una cita con el ID: ${id}`);
   }
 
-  existingData.splice(index, 1);
+  let existingData = readDataFromFile();
+
+  for (const data of dataArray) {
+    const sameTimeItem = existingData.find(item => item.arrivalTime === data.arrivalTime);
+    if (sameTimeItem) {
+      console.warn(`Ya existe una cita a la misma hora y el mismo día: ${data.arrivalTime}.`);
+      return res.status(400).send(`Ya existe una cita a la misma hora y el mismo día: ${data.arrivalTime}.`);
+    }
+  }
+
+  for (const data of dataArray) {
+    const arrivalTime = new Date().toISOString();
+    const newData = { ...data, id: ++appointmentCounter, arrivalTime: arrivalTime, modificationCount: 0 }; // Asigna un ID único
+    existingData.push(newData);
+  }
+
   writeDataToFile(existingData);
-  console.log(`Cita con ID: ${id} eliminada correctamente.`);
-  res.send(`Cita con ID: ${id} eliminada correctamente.`);
+  console.log('Datos guardados correctamente.');
+  res.send('Datos guardados correctamente.');
+});
+
+app.delete('/cancel/:id', (req, res) => {
+  const id = req.params.id;
+  let existingData = readDataFromFile();
+  const appointment = existingData.find(appointment => appointment.id === id);
+
+  if (!appointment) {
+    return res.status(404).send('No se encontró una cita con el ID proporcionado.');
+  }
+
+  appointment.status = 'cancelled';
+  writeDataToFile(existingData);
+  res.json({ message: 'Cita cancelada correctamente.', appointmentId: appointment.id });
 });
 
 app.get('/', (req, res) => {
