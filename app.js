@@ -18,6 +18,7 @@ const upload = multer({ storage: storage });
 
 app.use(express.json());
 let appointmentCounter = 0;
+
 function readDataFromFile() {
     if (fs.existsSync(filePath)) {
       try {
@@ -80,6 +81,23 @@ function readDataFromFile() {
     console.log('Datos guardados correctamente.');
     res.send('Datos guardados correctamente.');
   });
+app.delete('/delete/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  console.log(`Solicitud DELETE recibida para eliminar cita con ID: ${id}`);
+
+  let existingData = readDataFromFile();
+  const index = existingData.findIndex(item => item.id === id);
+
+  if (index === -1) {
+    console.warn(`No se encontró una cita con el ID: ${id}`);
+    return res.status(404).send(`No se encontró una cita con el ID: ${id}`);
+  }
+
+  existingData.splice(index, 1);
+  writeDataToFile(existingData);
+  console.log(`Cita con ID: ${id} eliminada correctamente.`);
+  res.send(`Cita con ID: ${id} eliminada correctamente.`);
+});
 
 app.get('/', (req, res) => {
   res.send('¡Hola, mundo!');
