@@ -6,6 +6,8 @@ const app = express();
 const filePath = "citas.json";
 const port = 3000;
 
+let nextId = 1; 
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -45,6 +47,11 @@ function writeDataToFile(data) {
   }
 }
 
+function getNextId(existingData) {
+  // Obtener el próximo ID secuencial
+  return existingData.length > 0 ? Math.max(...existingData.map(d => d.id)) + 1 : 1;
+}
+
 app.post('/save', upload.single('image'), (req, res) => {
   console.log('Solicitud POST recibida para guardar datos:', req.body);
 
@@ -72,15 +79,14 @@ app.post('/save', upload.single('image'), (req, res) => {
     }
   }
 
-  for (const data of dataArray) {
-    const newData = { 
-      ...data, 
-      status: 'active',
-      image: req.file ? req.file.filename : null 
-    };
-    existingData.push(newData);
-  }
+  const newDataArray = dataArray.map(data => ({
+    ...data,
+    id: getNextId(existingData), 
+    status: 'active',
+    image: req.file ? req.file.filename : null
+  }));
 
+  existingData = existingData.concat(newDataArray);
   writeDataToFile(existingData);
   console.log('Datos guardados correctamente.');
   res.send('Datos guardados correctamente.');
@@ -128,12 +134,16 @@ app.get('/citas', (req, res) => {
   res.json(citasConImagen);
 });
 
-app.delete('/cancel/:id', (req, res) => {
-  const id = req.params.id;
+app.patch('/cancel/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10); 
   let existingData = readDataFromFile();
+
+  console.log('ID recibido para cancelar:', id); 
+
   const appointment = existingData.find((appointment) => appointment.id === id);
 
   if (!appointment) {
+    console.log('No se encontró una cita con el ID:', id); 
     return res.status(404).send('No se encontró una cita con el ID proporcionado.');
   }
 
