@@ -1,16 +1,9 @@
 [
   {
     "id": 1,
-    "arrivalTime": "2024-09-07T22:51:59.746Z",
-    "name": "Juan Perez",
-    "cedula": "1234567890",
-    "modificationCount": 0
-  },
-  {
-    "id": 2,
-    "arrivalTime": "2024-09-07T22:51:59.748Z",
-    "name": "Maria Gomez",
-    "cedula": "0987654321",
-    "modificationCount": 0
+    "arrivalTime": "2024-09-07T00:00:00.000Z",
+    "name": "Carlos Mendoza",
+    "cedula": "1122334455",
+    "image": "1725753219606.png"
   }
 ]
