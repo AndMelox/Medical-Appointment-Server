@@ -1,10 +1,10 @@
 [
   {
-    "id": 1,
+    "id": "1",
     "arrivalTime": "2024-09-07T00:00:00.000Z",
     "name": "Carlos Mendoza",
     "cedula": "1122334455",
-    "image": "1725753219606.png",
+    "image": "1633024800000.png",
     "status": "active"
   }
 ]
