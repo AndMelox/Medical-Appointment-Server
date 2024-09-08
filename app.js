@@ -87,18 +87,13 @@ app.post('/save', upload.single('image'), (req, res) => {
 });
 
 app.get('/citas', (req, res) => {
-  const { startDate, endDate, cedula } = req.query;
+  const { startDate, endDate } = req.query;
 
   console.log('startDate:', startDate);
   console.log('endDate:', endDate);
-  console.log('cedula:', cedula);
 
   if (!startDate || !endDate) {
     return res.status(400).send('Debe proporcionar startDate y endDate en la consulta.');
-  }
-
-  if (!/^\d{10}$/.test(cedula)) {
-    return res.status(400).send('La cédula debe tener 10 dígitos.');
   }
 
   const start = new Date(startDate.split('T')[0]);
@@ -120,7 +115,7 @@ app.get('/citas', (req, res) => {
   const filteredCitas = existingData.filter(cita => {
     const citaDate = new Date(cita.arrivalTime.split('T')[0]);
     console.log('citaDate:', citaDate);
-    return citaDate >= start && citaDate < end && cita.cedula === cedula;
+    return citaDate >= start && citaDate < end;
   });
 
   console.log('filteredCitas:', filteredCitas);
