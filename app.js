@@ -1,25 +1,26 @@
-const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const app = express();
-const filePath = 'citas.json';
+const filePath = "citas.json";
 const port = 3000;
+
+let appointmentCounter = 0;
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname));
-  }
+  },
 });
 const upload = multer({ storage: storage });
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Leer datos desde el archivo JSON
 function readDataFromFile() {
   if (fs.existsSync(filePath)) {
     try {
@@ -37,7 +38,6 @@ function readDataFromFile() {
   }
 }
 
-// Escribir datos en el archivo JSON
 function writeDataToFile(data) {
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
