@@ -6,8 +6,6 @@ const app = express();
 const filePath = "citas.json";
 const port = 3000;
 
-let appointmentCounter = 0;
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -80,7 +78,7 @@ app.post('/save', upload.single('document'), (req, res) => {
       const newData = { 
         ...data, 
         arrivalTime: arrivalTime,
-        image: req.file ? req.file.filename : null // Guardar el nombre del archivo de imagen
+        image: req.file ? req.file.filename : null 
       };
       existingData.push(newData);
     }
@@ -90,8 +88,6 @@ app.post('/save', upload.single('document'), (req, res) => {
     res.send('Datos guardados correctamente.');
   });
   
-
-// Endpoint para obtener citas en un rango de fechas
 app.get('/citas', (req, res) => {
     const { startDate, endDate } = req.query;
   
@@ -126,7 +122,6 @@ app.get('/citas', (req, res) => {
   
     console.log('filteredCitas:', filteredCitas);
   
-    // Añadir URL completa de la imagen a cada cita
     const citasConImagen = filteredCitas.map(cita => ({
       ...cita,
       imageUrl: cita.image ? `http://localhost:3000/uploads/${cita.image}` : null
@@ -134,7 +129,6 @@ app.get('/citas', (req, res) => {
   
     res.json(citasConImagen);
   });
-  
 
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
