@@ -63,9 +63,9 @@ app.post('/save', upload.single('image'), (req, res) => {
       return res.status(400).send('Cada objeto debe tener una fecha programada.');
     }
 
-    if (!/^\d{10}$/.test(item.cedula)) {
-      console.warn('La cédula debe tener 10 dígitos.');
-      return res.status(400).send('La cédula debe tener 10 dígitos.');
+    if (!/^\d{6,10}$/.test(item.cedula)) {
+      console.warn('La cédula debe tener entre 6 y 10 dígitos.');
+      return res.status(400).send('La cédula debe tener entre 6 y 10 dígitos.');
     }
   }
 
