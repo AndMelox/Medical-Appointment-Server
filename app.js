@@ -5,6 +5,10 @@ const fs = require("fs");
 const app = express();
 const filePath = "citas.json";
 const port = 3000;
+const cors = require('cors');
+
+app.use(cors());
+
 
 let nextId = 1; 
 
@@ -48,7 +52,6 @@ function writeDataToFile(data) {
 }
 
 function getNextId(existingData) {
-  // Obtener el próximo ID secuencial
   return existingData.length > 0 ? Math.max(...existingData.map(d => d.id)) + 1 : 1;
 }
 
@@ -60,12 +63,12 @@ app.post('/save', upload.single('image'), (req, res) => {
   for (const item of dataArray) {
     if (typeof item.arrivalTime === 'undefined') {
       console.warn('Solicitud incorrecta. Cada objeto debe tener una fecha programada.');
-      return res.status(400).send('Cada objeto debe tener una fecha programada.');
+      return res.status(400).json({ message: 'Cada objeto debe tener una fecha programada.' });
     }
 
     if (!/^\d{10}$/.test(item.cedula)) {
       console.warn('La cédula debe tener 10 dígitos.');
-      return res.status(400).send('La cédula debe tener 10 dígitos.');
+      return res.status(400).json({ message: 'La cédula debe tener 10 dígitos.' });
     }
   }
 
@@ -75,7 +78,7 @@ app.post('/save', upload.single('image'), (req, res) => {
     const sameTimeItem = existingData.find(item => item.arrivalTime === data.arrivalTime);
     if (sameTimeItem) {
       console.warn(`Ya existe una cita a la misma hora y el mismo día: ${data.arrivalTime}.`);
-      return res.status(400).send(`Ya existe una cita a la misma hora y el mismo día: ${data.arrivalTime}.`);
+      return res.status(400).json({ message: `Ya existe una cita a la misma hora y el mismo día: ${data.arrivalTime}.` });
     }
   }
 
@@ -89,7 +92,7 @@ app.post('/save', upload.single('image'), (req, res) => {
   existingData = existingData.concat(newDataArray);
   writeDataToFile(existingData);
   console.log('Datos guardados correctamente.');
-  res.send('Datos guardados correctamente.');
+  res.status(200).json({ message: 'Datos guardados correctamente.' });
 });
 
 app.get('/citas', (req, res) => {
